@@ -18,11 +18,12 @@ All models run through LiveKit's managed inference layer.
 
 ## Key Features
 
-- **Knowledge Base Integration:** RAG-based search for answering domain-specific questions
-- **Call Analytics:** Automatic call classification (spam detection, callback requirements)
+- **Real-time Voice Conversations:** Natural speech interactions with low latency
+- **Call Analytics:** Automatic call classification (spam detection, callback requirements, reason for call)
 - **Silence Detection:** Auto-prompts after 5s silence, ends call after 10s
-- **Backend Integration:** Session management and analytics via REST API
 - **Noise Cancellation:** BVC for regular calls, BVC Telephony for SIP calls
+- **Interruption Support:** Users can interrupt the agent naturally
+- **Turn Detection:** Smart detection of when to respond
 
 ## Prerequisites
 
@@ -62,12 +63,6 @@ Creates `.env.local` with:
 - `NEXT_PUBLIC_LIVEKIT_URL`
 - `GOOGLE_API_KEY`
 - `OPENAI_API_KEY`
-- `BACKEND_URL`
-- `BACKEND_API_PREFIX`
-- `KNOWLEDGE_BASE_DEFAULT_LIMIT`
-- `OPENAI_EMBEDDING_MODEL`
-
-[View credentials sheet](https://docs.google.com/spreadsheets/d/1eSq3vo-d6L5JbJQ3kL0ZpKUtZajnyGS-OVdglcB5bzQ/edit?usp=sharing)
 
 ### Deploy
 
@@ -139,13 +134,28 @@ uv run agent.py start
 
 ## Agent Behavior
 
-- Greets users when they connect (configurable initiation mode)
+- Greets users with "Hello! How can I help you today?" when they connect
 - Responds to natural speech in real time
 - Supports interruptions and turn-taking
-- Knowledge base search for domain-specific queries
-- Automatic silence detection and call termination
+- Automatic silence detection:
+  - After 5 seconds: Prompts "Are you still there?"
+  - After 10 seconds: Says "Thank you for your time" and ends call
 - Call classification and analytics on session end
 - Room lifecycle is managed by LiveKit Cloud
+
+## Project Structure
+
+```
+python/
+├── agent.py                 # Main agent entry point
+├── core/
+│   ├── logging/            # Logging infrastructure
+│   ├── models/             # Data models (CallClassification, CallMetadata)
+│   └── utils/              # Utility functions
+├── livekit.toml            # LiveKit configuration
+├── pyproject.toml          # Python dependencies
+└── .env.example            # Environment variables template
+```
 
 ## Cost Analysis
 
