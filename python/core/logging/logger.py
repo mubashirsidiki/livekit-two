@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Dict
-from config import CONFIG
 from logging.config import dictConfig
+
+APP_NAME = "livekit-agent"
 
 
 class LoggerManager:
@@ -22,7 +23,7 @@ class LoggerManager:
                 },
             },
             "loggers": {
-                CONFIG.app_name: {
+                APP_NAME: {
                     "handlers": ["console"],
                     "level": "INFO",
                     "propagate": False,
@@ -36,7 +37,7 @@ class LoggerManager:
 
     @property
     def logger(self) -> logging.Logger:
-        return logging.getLogger(CONFIG.app_name)
+        return logging.getLogger(APP_NAME)
 
 
 class ContextLoggerAdapter(logging.LoggerAdapter):
@@ -56,4 +57,4 @@ def get_logger(**context) -> ContextLoggerAdapter:
     return ContextLoggerAdapter(LOG, context)
 
 
-LOG.info(f"{CONFIG.app_name} logger initialized")
+LOG.info(f"{APP_NAME} logger initialized")

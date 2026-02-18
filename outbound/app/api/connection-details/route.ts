@@ -91,10 +91,6 @@ function createParticipantToken(userInfo: AccessTokenOptions, roomName: string) 
   const at = new AccessToken(API_KEY, API_SECRET, {
     ...userInfo,
     ttl: '15m',
-    attributes: {
-      accessToken: process.env.AGENT_TOKEN!,
-      agentId: process.env.AGENT_ID!,
-    }
   });
 
   console.log(at)

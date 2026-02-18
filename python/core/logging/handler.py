@@ -13,17 +13,11 @@ class JsonFormatter(logging.Formatter):
         if datefmt:
             if ".%" in datefmt:
                 parts = datefmt.split(".%")
-                return (
-                    dt.strftime(parts[0])
-                    + f".{microseconds:06d}"
-                    + dt.strftime(parts[1])
-                )
+                return dt.strftime(parts[0]) + f".{microseconds:06d}" + dt.strftime(parts[1])
             return dt.strftime(datefmt)
 
         date_part = dt.strftime("%d %b %Y %A")
-        time_part = (
-            dt.strftime("%I:%M:%S") + f".{microseconds:06d} " + dt.strftime("%p")
-        )
+        time_part = dt.strftime("%I:%M:%S") + f".{microseconds:06d} " + dt.strftime("%p")
         return f"{date_part} {time_part}"
 
     def format(self, record: logging.LogRecord) -> str:
@@ -33,14 +27,8 @@ class JsonFormatter(logging.Formatter):
             "msg": record.getMessage(),
         }
 
-        standard_attrs = set(
-            logging.LogRecord(None, None, "", 0, "", (), None).__dict__.keys()
-        )
-        extra_fields = {
-            key: value
-            for key, value in record.__dict__.items()
-            if key not in standard_attrs
-        }
+        standard_attrs = set(logging.LogRecord(None, None, "", 0, "", (), None).__dict__.keys())
+        extra_fields = {key: value for key, value in record.__dict__.items() if key not in standard_attrs}
         log_record.update(extra_fields)
 
         return json.dumps(log_record, ensure_ascii=False)
@@ -57,9 +45,7 @@ class CustomTimedRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
             self.stream = None
 
         yesterday = datetime.now() - timedelta(days=1)
-        new_filename = os.path.join(
-            self._log_directory, f"{yesterday.strftime('%Y-%m-%d')}.log"
-        )
+        new_filename = os.path.join(self._log_directory, f"{yesterday.strftime('%Y-%m-%d')}.log")
 
         if os.path.exists(new_filename):
             os.remove(new_filename)
