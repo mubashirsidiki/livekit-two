@@ -1,6 +1,6 @@
 import asyncio
-from datetime import datetime, timezone
 from dotenv import load_dotenv
+from datetime import datetime, timezone
 
 from livekit import agents, rtc
 from livekit.agents import (
@@ -19,7 +19,7 @@ from livekit.plugins import noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from core.logging.logger import LOG
-from core.models import CallClassification, CallMetadata
+from core.models import CallMetadata, CallClassification
 
 load_dotenv(".env.local")
 
@@ -77,7 +77,9 @@ def _build_transcript(chat_ctx: ChatContext) -> str:
     return "\n".join(items)
 
 
-async def _extract_call_metadata(summarizer: inference.LLM, chat_ctx: ChatContext) -> CallClassification | None:
+async def _extract_call_metadata(
+    summarizer: inference.LLM, chat_ctx: ChatContext
+) -> CallClassification | None:
     transcript = _build_transcript(chat_ctx)
     if not transcript:
         return None
@@ -88,12 +90,8 @@ async def _extract_call_metadata(summarizer: inference.LLM, chat_ctx: ChatContex
         content=(
             "Analyze this phone call transcript and extract:\n"
             "1. is_spam: SPAM if sales/marketing, NOT_SPAM if legitimate inquiry, NOT_SURE if unclear\n"
-            "2. reason_for_call: Brief reason the caller contacted\n"
-            "3. callback_required: YES if caller needs follow-up, NO if resolved, NOT_SURE if unclear\n"
-            "4. callback_required_reason: Why callback is or isn't needed\n"
-            "5. caller_name: Name if provided, else None\n"
-            "6. calendar_event: If caller mentioned scheduling, extract title, description, start_time, end_time\n\n"
-            "Be precise. Use None for unknown values."
+            "2. reason_for_call: Brief reason the caller contacted\n\n"
+            "Be precise."
         ),
     )
     classification_ctx.add_message(role="user", content=transcript)
@@ -137,13 +135,8 @@ async def _on_session_end(
         metadata = CallMetadata(
             datetime=datetime.now(),
             call_transcript=_build_transcript(report.chat_history),
-            is_spam=classification.is_spam,
             reason_for_call=classification.reason_for_call,
-            callback_required=classification.callback_required,
-            callback_required_reason=classification.callback_required_reason,
-            caller_name=classification.caller_name,
-            calendar_event=classification.calendar_event,
-            service_pricing=classification.service_pricing,
+            is_spam=classification.is_spam,
             call_duration=round(call_duration["seconds"]),
         )
 
@@ -163,7 +156,9 @@ async def entrypoint(ctx: agents.JobContext):
     LOG.info(f"attributes, {participant.attributes}")
 
     LOG.info(f"ctx room, {ctx.room.name}")
-    LOG.info(f"participant. {participant.sid} {participant.identity} {participant.name}")
+    LOG.info(
+        f"participant. {participant.sid} {participant.identity} {participant.name}"
+    )
 
     LOG.info(f"participant kind: {participant.kind}")
 
@@ -213,7 +208,8 @@ async def entrypoint(ctx: agents.JobContext):
             audio_input=room_io.AudioInputOptions(
                 noise_cancellation=lambda params: (
                     noise_cancellation.BVCTelephony()
-                    if params.participant.kind == rtc.ParticipantKind.PARTICIPANT_KIND_SIP
+                    if params.participant.kind
+                    == rtc.ParticipantKind.PARTICIPANT_KIND_SIP
                     else noise_cancellation.BVC()
                 ),
             ),
